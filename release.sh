@@ -1,18 +1,23 @@
 #!/bin/bash
 #
-# release.sh - Build all release variants of murmprince
+# release.sh - Build all release variants of frank-prince
 #
 # Creates UF2 files for each board variant (M1, M2) at each clock speed:
 #   - Non-overclocked: 252 MHz CPU, 100 MHz PSRAM
 #   - Medium overclock: 378 MHz CPU, 133 MHz PSRAM
 #   - Max overclock: 504 MHz CPU, 166 MHz PSRAM
 #
-# Output format: murmprince_mX_Y_Z_A_BB.uf2
+# Output format: frank-prince_mX_Y_Z_A_BB.uf2
 #   X  = Board variant (1 or 2)
 #   Y  = CPU clock in MHz
 #   Z  = PSRAM clock in MHz (target)
 #   A  = Major version
 #   BB = Minor version (zero-padded)
+#
+# Usage:
+#   ./release.sh              # Interactive version prompt
+#   ./release.sh 1.04         # Use version 1.04
+#   ./release.sh 2.00         # Use version 2.00
 #
 
 set -e
@@ -46,18 +51,25 @@ if [[ $NEXT_MINOR -ge 100 ]]; then
     NEXT_MINOR=0
 fi
 
-# Interactive version input
+# Header
 echo ""
 echo -e "${CYAN}┌─────────────────────────────────────────────────────────────────┐${NC}"
-echo -e "${CYAN}│                   murmprince Release Builder                    │${NC}"
+echo -e "${CYAN}│                  FRANK Prince Release Builder                   │${NC}"
 echo -e "${CYAN}└─────────────────────────────────────────────────────────────────┘${NC}"
 echo ""
 echo -e "Last version: ${YELLOW}${LAST_MAJOR}.$(printf '%02d' $LAST_MINOR)${NC}"
 echo ""
 
 DEFAULT_VERSION="${NEXT_MAJOR}.$(printf '%02d' $NEXT_MINOR)"
-read -p "Enter version [default: $DEFAULT_VERSION]: " INPUT_VERSION
-INPUT_VERSION=${INPUT_VERSION:-$DEFAULT_VERSION}
+
+# Accept version from command line or prompt interactively
+if [[ -n "${1:-}" ]]; then
+    INPUT_VERSION="$1"
+    echo -e "Version from command line: ${GREEN}$INPUT_VERSION${NC}"
+else
+    read -p "Enter version [default: $DEFAULT_VERSION]: " INPUT_VERSION
+    INPUT_VERSION=${INPUT_VERSION:-$DEFAULT_VERSION}
+fi
 
 # Parse version (handle both "1.00" and "1 00" formats)
 if [[ "$INPUT_VERSION" == *"."* ]]; then
@@ -112,35 +124,35 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 
 for config in "${CONFIGS[@]}"; do
     read -r BOARD CPU PSRAM DESC <<< "$config"
-    
+
     BUILD_COUNT=$((BUILD_COUNT + 1))
-    
+
     # Board variant number
     if [[ "$BOARD" == "M1" ]]; then
         BOARD_NUM=1
     else
         BOARD_NUM=2
     fi
-    
+
     # Output filename
-    OUTPUT_NAME="murmprince_m${BOARD_NUM}_${CPU}_${PSRAM}_${VERSION}.uf2"
-    
+    OUTPUT_NAME="frank-prince_m${BOARD_NUM}_${CPU}_${PSRAM}_${VERSION}.uf2"
+
     echo ""
     echo -e "${CYAN}[$BUILD_COUNT/$TOTAL_BUILDS] Building: $OUTPUT_NAME${NC}"
     echo -e "  Board: $BOARD | CPU: ${CPU} MHz | PSRAM: ${PSRAM} MHz | $DESC"
-    
+
     # Clean and create build directory
     rm -rf build-make
     mkdir build-make
     cd build-make
-    
+
     # Configure with CMake
     if cmake .. -DBOARD_VARIANT="$BOARD" -DCPU_SPEED="$CPU" -DPSRAM_SPEED="$PSRAM" -DUSB_HID_ENABLED=1; then
         # Build
         if make -j8; then
             # Copy UF2 to release directory
-            if [[ -f "murmprince.uf2" ]]; then
-                cp "murmprince.uf2" "$RELEASE_DIR/$OUTPUT_NAME"
+            if [[ -f "frank-prince.uf2" ]]; then
+                cp "frank-prince.uf2" "$RELEASE_DIR/$OUTPUT_NAME"
                 echo -e "  ${GREEN}✓ Success${NC} → release/$OUTPUT_NAME"
             else
                 echo -e "  ${RED}✗ UF2 not found${NC}"
@@ -151,7 +163,7 @@ for config in "${CONFIGS[@]}"; do
     else
         echo -e "  ${RED}✗ CMake configuration failed${NC}"
     fi
-    
+
     cd "$SCRIPT_DIR"
 done
 
@@ -164,6 +176,6 @@ echo -e "${GREEN}Release build complete!${NC}"
 echo ""
 echo "Release files in: $RELEASE_DIR/"
 echo ""
-ls -la "$RELEASE_DIR"/murmprince_*_${VERSION}.uf2 2>/dev/null | awk '{print "  " $NF " (" $5 " bytes)"}'
+ls -la "$RELEASE_DIR"/frank-prince_*_${VERSION}.uf2 2>/dev/null | awk '{print "  " $NF " (" $5 " bytes)"}'
 echo ""
 echo -e "Version: ${CYAN}${MAJOR}.$(printf '%02d' $MINOR)${NC}"

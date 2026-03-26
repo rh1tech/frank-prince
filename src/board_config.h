@@ -7,11 +7,11 @@
 //=============================================================================
 // Debug Output Configuration
 //=============================================================================
-#ifndef MURMPRINCE_DEBUG
-#define MURMPRINCE_DEBUG 0
+#ifndef FRANK_PRINCE_DEBUG
+#define FRANK_PRINCE_DEBUG 0
 #endif
 
-#if MURMPRINCE_DEBUG
+#if FRANK_PRINCE_DEBUG
 #define DBG_PRINTF(...) printf(__VA_ARGS__)
 #else
 #define DBG_PRINTF(...) ((void)0)

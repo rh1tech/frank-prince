@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Build murmprince using CMake + Make.
+# Build frank-prince using CMake + Make.
 # Usage:
 #   ./build.sh                      # Build with defaults (M1, 378 MHz)
 #   ./build.sh clean                # Clean rebuild
@@ -112,4 +112,4 @@ echo "Building: Board=${BOARD_VAR}, CPU=${CPU_VAR} MHz, PSRAM=${PSRAM_VAR} MHz"
 cmake -S "$ROOT_DIR" -B "$BUILD_DIR" -G "Unix Makefiles" "${cmake_args[@]}"
 cmake --build "$BUILD_DIR" -- -j
 
-echo "Built: $BUILD_DIR/murmprince.elf"
+echo "Built: $BUILD_DIR/frank-prince.elf"

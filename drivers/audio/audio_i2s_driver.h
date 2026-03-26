@@ -1,5 +1,5 @@
 /*
- * murmprince - I2S Audio Driver Header
+ * frank-prince - I2S Audio Driver Header
  * Provides a callback-based audio interface for SDL audio emulation
  * 
  * PIO/SM allocation:

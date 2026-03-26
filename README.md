@@ -1,4 +1,4 @@
-# MurmPrince
+# FRANK Prince
 
 Prince of Persia for Raspberry Pi Pico 2 (RP2350) with HDMI output, SD card, and PS/2 keyboard.
 
@@ -32,7 +32,7 @@ Both boards provide all necessary peripherals out of the box—no additional wir
 
 ### PSRAM Options
 
-MurmPrince requires 8MB PSRAM to run. You can obtain PSRAM-equipped hardware in several ways:
+FRANK Prince requires 8MB PSRAM to run. You can obtain PSRAM-equipped hardware in several ways:
 
 1. **Solder a PSRAM chip** on top of the Flash chip on a Pico 2 clone (SOP-8 flash chips are only available on clones, not the original Pico 2)
 2. **Build a [Nyx 2](https://rh1.tech/projects/nyx?area=nyx2)** — a DIY RP2350 board with integrated PSRAM
@@ -89,8 +89,8 @@ Two GPIO layouts are supported: **M1** and **M2**. The PSRAM pin is auto-detecte
 
 ```bash
 # Clone the repository with submodules
-git clone --recursive https://github.com/rh1tech/murmprince.git
-cd murmprince
+git clone --recursive https://github.com/rh1tech/frank-prince.git
+cd frank-prince
 
 # Or if already cloned, initialize submodules
 git submodule update --init --recursive
@@ -127,25 +127,26 @@ Speed presets:
 To build all 6 variants (M1/M2 × 3 speeds) with version numbering:
 
 ```bash
-./release.sh
+./release.sh              # Interactive version prompt
+./release.sh 1.04         # Use version 1.04 from command line
 ```
 
 This creates versioned UF2 files in the `release/` directory:
-- `murmprince_m1_252_100_X_XX.uf2`
-- `murmprince_m1_378_133_X_XX.uf2`
-- `murmprince_m1_504_166_X_XX.uf2`
-- `murmprince_m2_252_100_X_XX.uf2`
-- `murmprince_m2_378_133_X_XX.uf2`
-- `murmprince_m2_504_166_X_XX.uf2`
+- `frank-prince_m1_252_100_X_XX.uf2`
+- `frank-prince_m1_378_133_X_XX.uf2`
+- `frank-prince_m1_504_166_X_XX.uf2`
+- `frank-prince_m2_252_100_X_XX.uf2`
+- `frank-prince_m2_378_133_X_XX.uf2`
+- `frank-prince_m2_504_166_X_XX.uf2`
 
 ### Flashing
 
 ```bash
 # With device in BOOTSEL mode:
-picotool load build-make/murmprince.uf2
+picotool load build-make/frank-prince.uf2
 
 # Or with device running:
-picotool load -f build-make/murmprince.uf2
+picotool load -f build-make/frank-prince.uf2
 
 # Or use the flash script:
 ./flash.sh
@@ -154,7 +155,7 @@ picotool load -f build-make/murmprince.uf2
 ## SD Card Setup
 
 1. Format an SD card as FAT32
-2. Download [prince.zip](https://github.com/rh1tech/murmprince/raw/main/sdcard/prince.zip) and extract it
+2. Download [prince.zip](https://github.com/rh1tech/frank-prince/raw/main/sdcard/prince.zip) and extract it
 3. Copy the `prince` folder to the root of your SD card
 
 ### Upgrading from Version 1.00

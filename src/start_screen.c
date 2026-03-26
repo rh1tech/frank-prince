@@ -1,5 +1,5 @@
 /*
- * MurmPrince Start Screen
+ * FRANK Prince Start Screen
  * Adapted from murmdoom start screen implementation
  * Shows system info and errors before game launch
  */
@@ -32,8 +32,8 @@ extern uint8_t *graphics_buffer;
 static uint8_t back_buffer[SCREEN_W * SCREEN_H];
 
 // Version from build system
-#ifndef MURMPRINCE_VERSION
-#define MURMPRINCE_VERSION "?"
+#ifndef FRANK_PRINCE_VERSION
+#define FRANK_PRINCE_VERSION "?"
 #endif
 
 // ============================================================================
@@ -465,7 +465,7 @@ void start_screen_show(start_error_t error, const char* error_msg) {
     // Error color (red)
     graphics_set_palette(19, 0xFF4444);
     
-    // Almost white for MurmPrince text on blue background
+    // Almost white for FRANK Prince text on blue background
     graphics_set_palette(21, 0xDDDDFF);
     
     graphics_restore_sync_colors();
@@ -479,9 +479,9 @@ void start_screen_show(start_error_t error, const char* error_msg) {
     const int panel_h = SCREEN_H - 88;  // Keep same panel height
 
     // Build strings
-    const char *title_left = "MurmPrince";
+    const char *title_left = "FRANK Prince";
     char title_right[96];
-    snprintf(title_right, sizeof(title_right), " by Mikhail Matveev v%s", MURMPRINCE_VERSION);
+    snprintf(title_right, sizeof(title_right), " by Mikhail Matveev v%s", FRANK_PRINCE_VERSION);
 
     const int title_left_w = text_width_5x7(title_left);
     const int title_right_w = text_width_5x7(title_right);
@@ -516,7 +516,7 @@ void start_screen_show(start_error_t error, const char* error_msg) {
              (int)DPSRAM_SPEED,
              (unsigned long)psram_cs);
     
-    const char *status3 = "github.com/rh1tech/murmprince";
+    const char *status3 = "https://github.com/rh1tech/frank-prince";
     
     // Error messages
     const char *err_line = NULL;
@@ -552,7 +552,7 @@ void start_screen_show(start_error_t error, const char* error_msg) {
         // Draw black panel
         fill_rect(panel_x, panel_y, panel_w, panel_h, 0);
         
-        // Highlight "MurmPrince" with background and light text
+        // Highlight "FRANK Prince" with background and light text
         fill_rect(title_x - 2, title_y - 2, title_left_w + 4, 7 + 4, 18);
         draw_text_5x7(title_x, title_y, title_left, 21);
         draw_text_5x7(title_x + title_left_w, title_y, title_right, 1);

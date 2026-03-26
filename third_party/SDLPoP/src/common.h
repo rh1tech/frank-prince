@@ -61,10 +61,10 @@ extern "C" {
 #include "proto.h"
 #include "data.h"
 
-/* Debug output macro - controlled by MURMPRINCE_DEBUG in board_config.h */
+/* Debug output macro - controlled by FRANK_PRINCE_DEBUG in board_config.h */
 #ifdef POP_RP2350
 #include "board_config.h"
-#if MURMPRINCE_DEBUG
+#if FRANK_PRINCE_DEBUG
 #define DBG_PRINTF(...) printf(__VA_ARGS__)
 #else
 #define DBG_PRINTF(...) ((void)0)

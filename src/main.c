@@ -1,5 +1,5 @@
 /*
- * murmprince - Prince of Persia (SDLPoP) RP2350 port
+ * frank-prince - Prince of Persia (SDLPoP) RP2350 port
  * Entry point: init HDMI + PSRAM + SD, show start screen, then run SDLPoP.
  */
 
@@ -145,9 +145,9 @@ int main(void) {
     // This keeps the serial device available while avoiding early console chatter.
     sleep_ms(3000);
 
-    DBG_PRINTF("murmprince - RP2350 SDLPoP bootstrap\n");
+    DBG_PRINTF("frank-prince - RP2350 SDLPoP bootstrap\n");
     DBG_PRINTF("System Clock: %lu MHz\n", clock_get_hz(clk_sys) / 1000000);
-#if MURMPRINCE_DEBUG
+#if FRANK_PRINCE_DEBUG
     DBG_PRINTF("Build flags: RP2350_BOOT_TEST_PATTERN=%d RP2350_BOOT_TEST_PATTERN_HALT=%d\n",
         (int)RP2350_BOOT_TEST_PATTERN, (int)RP2350_BOOT_TEST_PATTERN_HALT);
     DBG_PRINTF("Build flags: RP2350_BOOT_TEST_PATTERN_MODE=%d\n", (int)RP2350_BOOT_TEST_PATTERN_MODE);

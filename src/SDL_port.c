@@ -1277,7 +1277,7 @@ void SDL_SetWindowIcon(SDL_Window *window, SDL_Surface *icon) { (void)window; (v
 #endif
 
 // -----------------------------------------------------------------------------
-// Audio APIs - I2S output via pico-extras
+// Audio APIs - I2S output via PIO + DMA
 // -----------------------------------------------------------------------------
 #if RP_SDL_FEATURE_AUDIO
 

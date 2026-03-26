@@ -35,13 +35,7 @@ message(STATUS "Board: ${BOARD_VARIANT}, CPU: ${CPU_SPEED} MHz, PSRAM: ${PSRAM_S
 
 include(pico_sdk_import.cmake)
 
-# Import pico-extras for audio_i2s library
-set(PICO_EXTRAS_PATH ${CMAKE_CURRENT_LIST_DIR}/pico-extras CACHE PATH "Path to pico-extras")
-if(EXISTS ${PICO_EXTRAS_PATH}/external/pico_extras_import.cmake)
-    include(${PICO_EXTRAS_PATH}/external/pico_extras_import.cmake)
-endif()
-
-project(murmprince C CXX ASM)
+project(frank-prince C CXX ASM)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
@@ -61,11 +55,6 @@ add_compile_definitions(
 )
 
 pico_sdk_init()
-
-# Initialize pico-extras if available (for audio_i2s)
-if(COMMAND pico_extras_init)
-    pico_extras_init()
-endif()
 
 # FatFS + SD card driver
 add_subdirectory(src/fatfs)
@@ -105,10 +94,10 @@ target_include_directories(sdlpop PUBLIC
 )
 
 if(USE_REAL_SDL2)
-    set(MURMPRINCE_SDL2_DIR "${CMAKE_CURRENT_LIST_DIR}/third_party/SDL2")
-    if(NOT EXISTS "${MURMPRINCE_SDL2_DIR}/CMakeLists.txt")
+    set(FRANK_PRINCE_SDL2_DIR "${CMAKE_CURRENT_LIST_DIR}/third_party/SDL2")
+    if(NOT EXISTS "${FRANK_PRINCE_SDL2_DIR}/CMakeLists.txt")
         message(FATAL_ERROR
-            "USE_REAL_SDL2=ON, but SDL2 sources were not found at ${MURMPRINCE_SDL2_DIR}.\n"
+            "USE_REAL_SDL2=ON, but SDL2 sources were not found at ${FRANK_PRINCE_SDL2_DIR}.\n"
             "Add SDL2 there (e.g. as a git submodule), then re-configure.\n"
             "Example: git submodule add https://github.com/libsdl-org/SDL.git third_party/SDL2")
     endif()
@@ -122,36 +111,36 @@ if(USE_REAL_SDL2)
     # Try to find a usable SDL2 target name across SDL2 CMake variants.
     # Prefer the *real* build target (non-alias) so we can add overlay sources.
     if(TARGET SDL2-static)
-        set(MURMPRINCE_SDL2_TARGET SDL2-static)
+        set(FRANK_PRINCE_SDL2_TARGET SDL2-static)
     elseif(TARGET SDL2)
-        set(MURMPRINCE_SDL2_TARGET SDL2)
+        set(FRANK_PRINCE_SDL2_TARGET SDL2)
     elseif(TARGET SDL2::SDL2-static)
-        set(MURMPRINCE_SDL2_TARGET SDL2::SDL2-static)
+        set(FRANK_PRINCE_SDL2_TARGET SDL2::SDL2-static)
     elseif(TARGET SDL2::SDL2)
-        set(MURMPRINCE_SDL2_TARGET SDL2::SDL2)
+        set(FRANK_PRINCE_SDL2_TARGET SDL2::SDL2)
     else()
         message(FATAL_ERROR "SDL2 was added, but no known SDL2 CMake target was found")
     endif()
 
     # Overlay (sketch) RP2350 driver sources into SDL2 once it’s present.
     # These currently compile only inside SDL2 (`SDL_INTERNAL_BUILD`).
-    # If `MURMPRINCE_SDL2_TARGET` is an ALIAS target in your SDL2 version,
+    # If `FRANK_PRINCE_SDL2_TARGET` is an ALIAS target in your SDL2 version,
     # CMake will error on target_sources(); in that case we’ll switch to the
     # underlying concrete target after we vendor SDL2.
-    if(TARGET ${MURMPRINCE_SDL2_TARGET})
-        target_sources(${MURMPRINCE_SDL2_TARGET} PRIVATE
+    if(TARGET ${FRANK_PRINCE_SDL2_TARGET})
+        target_sources(${FRANK_PRINCE_SDL2_TARGET} PRIVATE
             ${CMAKE_CURRENT_LIST_DIR}/src/sdl2_rp2350_backend/rp2350_video_driver.c
             ${CMAKE_CURRENT_LIST_DIR}/src/sdl2_rp2350_backend/rp2350_events.c
             ${CMAKE_CURRENT_LIST_DIR}/src/sdl2_rp2350_backend/rp2350_platform_glue.c
         )
-        target_include_directories(${MURMPRINCE_SDL2_TARGET} PRIVATE
+        target_include_directories(${FRANK_PRINCE_SDL2_TARGET} PRIVATE
             ${CMAKE_CURRENT_LIST_DIR}/src/sdl2_rp2350_backend
             ${CMAKE_CURRENT_LIST_DIR}/drivers
             ${CMAKE_CURRENT_LIST_DIR}/src
         )
     endif()
 
-    target_link_libraries(sdlpop PRIVATE ${MURMPRINCE_SDL2_TARGET})
+    target_link_libraries(sdlpop PRIVATE ${FRANK_PRINCE_SDL2_TARGET})
 
     # Keep firmware/port-only headers in a separate include root so we can
     # avoid shadowing upstream SDL headers.
@@ -185,7 +174,7 @@ target_compile_options(drivers PRIVATE -Ofast)
 
 target_link_libraries(drivers pico_stdlib hardware_dma hardware_pio hardware_spi hardware_clocks)
 
-add_executable(murmprince
+add_executable(frank-prince
     src/main.c
     src/pop_fs.c
     src/rp2350_alloc_trace.c
@@ -194,8 +183,8 @@ add_executable(murmprince
 
 if(USE_REAL_SDL2)
     # SDL2_image stub uses stb_image.
-    target_sources(murmprince PRIVATE src/stb_image_impl.c)
-    target_sources(murmprince PRIVATE src/sdl2_image_stub/SDL_image_stub.c)
+    target_sources(frank-prince PRIVATE src/stb_image_impl.c)
+    target_sources(frank-prince PRIVATE src/sdl2_image_stub/SDL_image_stub.c)
 else()
     add_library(rp_sdl STATIC
         src/SDL_port.c
@@ -212,23 +201,18 @@ else()
 
     target_compile_definitions(rp_sdl PUBLIC
         POP_RP2350
+        BOARD_${BOARD_VARIANT}
         RP_SDL_FEATURE_WINDOW=0
         RP_SDL_FEATURE_MESSAGEBOX=0
         RP_SDL_FEATURE_AUDIO=1
         RP_SDL_FEATURE_JOYSTICK=0
         RP_SDL_FEATURE_GAMECONTROLLER=0
         RP_SDL_FEATURE_HAPTIC=0
-        # I2S Audio Configuration
-        # Audio uses DMA_IRQ_0, HDMI uses DMA_IRQ_1 (set in HDMI.h)
-        PICO_AUDIO_I2S_PIO=0
-        PICO_AUDIO_I2S_DMA_IRQ=0
     )
 
-    # Board-specific I2S pin definitions
+    # Board-specific SD card pin definitions
     if(BOARD_VARIANT STREQUAL "M1")
         target_compile_definitions(rp_sdl PUBLIC
-            PICO_AUDIO_I2S_DATA_PIN=26
-            PICO_AUDIO_I2S_CLOCK_PIN_BASE=27
             SDCARD_PIN_SPI0_SCK=2
             SDCARD_PIN_SPI0_MOSI=3
             SDCARD_PIN_SPI0_MISO=4
@@ -236,8 +220,6 @@ else()
         )
     elseif(BOARD_VARIANT STREQUAL "M2")
         target_compile_definitions(rp_sdl PUBLIC
-            PICO_AUDIO_I2S_DATA_PIN=9
-            PICO_AUDIO_I2S_CLOCK_PIN_BASE=10
             SDCARD_PIN_SPI0_MISO=4
             SDCARD_PIN_SPI0_CS=5
             SDCARD_PIN_SPI0_SCK=6
@@ -259,20 +241,30 @@ else()
         usbhid
     )
 
+    # Generate PIO header for I2S audio driver
+    pico_generate_pio_header(rp_sdl ${AUDIO_I2S_PIO_FILE})
+
     # Make SDLPoP explicitly depend on the rp_sdl shim.
     target_link_libraries(sdlpop PRIVATE rp_sdl)
 endif()
 
-target_include_directories(murmprince PRIVATE src drivers)
+target_include_directories(frank-prince PRIVATE src drivers)
 
-target_compile_options(murmprince PRIVATE -Ofast)
+target_compile_options(frank-prince PRIVATE -Ofast)
 
-# Inject version.txt as a compile-time string.
-file(READ "${CMAKE_CURRENT_LIST_DIR}/version.txt" MURMPRINCE_VERSION_RAW)
-string(STRIP "${MURMPRINCE_VERSION_RAW}" MURMPRINCE_VERSION_RAW)
-string(REGEX REPLACE "[ \t]+" "." MURMPRINCE_VERSION "${MURMPRINCE_VERSION_RAW}")
+# Inject version.txt as a compile-time string (zero-padded: "1 3" -> "1.03").
+file(READ "${CMAKE_CURRENT_LIST_DIR}/version.txt" FRANK_PRINCE_VERSION_RAW)
+string(STRIP "${FRANK_PRINCE_VERSION_RAW}" FRANK_PRINCE_VERSION_RAW)
+string(REGEX MATCH "^([0-9]+)[ \t]+([0-9]+)$" _VER_MATCH "${FRANK_PRINCE_VERSION_RAW}")
+set(_VER_MAJOR "${CMAKE_MATCH_1}")
+set(_VER_MINOR "${CMAKE_MATCH_2}")
+if(_VER_MINOR LESS 10)
+    set(FRANK_PRINCE_VERSION "${_VER_MAJOR}.0${_VER_MINOR}")
+else()
+    set(FRANK_PRINCE_VERSION "${_VER_MAJOR}.${_VER_MINOR}")
+endif()
 
-target_compile_definitions(murmprince PRIVATE
+target_compile_definitions(frank-prince PRIVATE
     BOARD_${BOARD_VARIANT}
     CPU_CLOCK_MHZ=${CPU_SPEED}
     CPU_VOLTAGE=${CPU_VOLTAGE}
@@ -280,7 +272,7 @@ target_compile_definitions(murmprince PRIVATE
     DBOARD_VARIANT="${BOARD_VARIANT}"
     DCPU_SPEED=${CPU_SPEED}
     DPSRAM_SPEED=${PSRAM_SPEED}
-    MURMPRINCE_VERSION="${MURMPRINCE_VERSION}"
+    FRANK_PRINCE_VERSION="${FRANK_PRINCE_VERSION}"
     POP_RP2350
     RP2350_FORCE_TEST_PATTERN=${RP2350_FORCE_TEST_PATTERN}
     RP2350_DUMP_FIRST_FRAME_BYTES=${RP2350_DUMP_FIRST_FRAME_BYTES}
@@ -290,18 +282,18 @@ target_compile_definitions(murmprince PRIVATE
     RP2350_BOOT_TEST_PATTERN_MODE=${RP2350_BOOT_TEST_PATTERN_MODE}
 )
 
-target_link_libraries(murmprince pico_stdlib hardware_vreg hardware_clocks hardware_flash hardware_sync drivers sdcard ps2kbd usbhid sdlpop)
+target_link_libraries(frank-prince pico_stdlib hardware_vreg hardware_clocks hardware_flash hardware_sync drivers sdcard ps2kbd usbhid sdlpop)
 
 if(NOT USE_REAL_SDL2)
-    target_link_libraries(murmprince rp_sdl)
+    target_link_libraries(frank-prince rp_sdl)
 endif()
 
 # USB HID Host and USB CDC stdio are mutually exclusive
 if(USB_HID_ENABLED)
-    pico_enable_stdio_usb(murmprince 0)
+    pico_enable_stdio_usb(frank-prince 0)
 else()
-    pico_enable_stdio_usb(murmprince 1)
+    pico_enable_stdio_usb(frank-prince 1)
 endif()
-pico_enable_stdio_uart(murmprince 0)
+pico_enable_stdio_uart(frank-prince 0)
 
-pico_add_extra_outputs(murmprince)
+pico_add_extra_outputs(frank-prince)

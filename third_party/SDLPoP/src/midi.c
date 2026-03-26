@@ -572,7 +572,10 @@ void midi_callback(void *userdata, Uint8 *stream, int len) {
 			if (is_sound_on && enable_music) {
 				short* dest = (short*)stream;
 				for (int i = 0; i < advance_frames * 2; ++i) {
-					dest[i] += midi_temp_buffer[i];
+					int32_t mixed = (int32_t)dest[i] + (midi_temp_buffer[i] >> 1);
+					if (mixed > 32767) mixed = 32767;
+					if (mixed < -32768) mixed = -32768;
+					dest[i] = (short)mixed;
 				}
 			}
 
@@ -1163,22 +1166,28 @@ void midi_cached_callback(void *userdata, Uint8 *stream, int len) {
 			}
 		}
 		
-		// Direct copy (44100 Hz cache -> 44100 Hz output, no upsampling)
-		while (frames_written < frames_needed && 
+		// Additive mix at 50% volume (44100 Hz cache -> 44100 Hz output)
+		while (frames_written < frames_needed &&
 		       midi_stream_buffer_pos < midi_stream_buffer_valid &&
 		       midi_stream_samples_remaining > 0) {
-			int16_t left = midi_stream_buffer[midi_stream_buffer_pos * 2];
-			int16_t right = midi_stream_buffer[midi_stream_buffer_pos * 2 + 1];
-			
+			int16_t left = midi_stream_buffer[midi_stream_buffer_pos * 2] >> 1;
+			int16_t right = midi_stream_buffer[midi_stream_buffer_pos * 2 + 1] >> 1;
+
 			// Track max sample for debug
 			if (left > max_sample) max_sample = left;
 			if (right > max_sample) max_sample = right;
 			if (-left > max_sample) max_sample = -left;
 			if (-right > max_sample) max_sample = -right;
-			
-			// Direct output (no upsampling needed)
-			out[frames_written * 2] = left;
-			out[frames_written * 2 + 1] = right;
+
+			// Additive mix with clamping
+			int32_t mix_l = (int32_t)out[frames_written * 2] + left;
+			int32_t mix_r = (int32_t)out[frames_written * 2 + 1] + right;
+			if (mix_l > 32767) mix_l = 32767;
+			if (mix_l < -32768) mix_l = -32768;
+			if (mix_r > 32767) mix_r = 32767;
+			if (mix_r < -32768) mix_r = -32768;
+			out[frames_written * 2] = (int16_t)mix_l;
+			out[frames_written * 2 + 1] = (int16_t)mix_r;
 			frames_written++;
 			
 			midi_stream_buffer_pos++;

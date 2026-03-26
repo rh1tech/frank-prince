@@ -2545,25 +2545,28 @@ void digi_callback(void *userdata, Uint8 *stream, int len) {
 			if (digi_src_position >= digi_src_sample_count - 1) {
 				break; // End of source
 			}
-			
+
 			int src_frame_0 = (int)digi_src_position;
 			float alpha = digi_src_position - src_frame_0;
-			
+
 			// Get 8-bit unsigned samples, convert to 16-bit signed
 			int sample_0 = (digi_src_samples[src_frame_0] | (digi_src_samples[src_frame_0] << 8)) - 32768;
 			int sample_1 = sample_0;
 			if (src_frame_0 + 1 < digi_src_sample_count) {
 				sample_1 = (digi_src_samples[src_frame_0 + 1] | (digi_src_samples[src_frame_0 + 1] << 8)) - 32768;
 			}
-			
-			// Linear interpolation
-			short interpolated = (short)((1.0f - alpha) * sample_0 + alpha * sample_1);
-			
-			// Output stereo
+
+			// Linear interpolation, attenuate to 50% to leave headroom for mixing
+			short interpolated = (short)(((1.0f - alpha) * sample_0 + alpha * sample_1) * 0.5f);
+
+			// Additive mix into stereo output
 			for (int ch = 0; ch < output_channels; ++ch) {
-				*dest++ = interpolated;
+				int32_t mixed = (int32_t)*dest + interpolated;
+				if (mixed > 32767) mixed = 32767;
+				if (mixed < -32768) mixed = -32768;
+				*dest++ = (short)mixed;
 			}
-			
+
 			digi_src_position += digi_src_ratio;
 			frames_filled++;
 		}

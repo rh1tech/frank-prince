@@ -584,7 +584,7 @@ static inline bool hdmi_init() {
     sm_config_set_clkdiv(&c_c, clk_ratio);
     // Diagnostics: fractional PIO clkdiv can introduce jitter and visible vertical artifacts.
     // pop2350 runs clk_sys=252MHz, producing an integer divider of 1.0.
-#if MURMPRINCE_DEBUG
+#if FRANK_PRINCE_DEBUG
     {
         const float frac = clk_ratio - (float)((int)clk_ratio);
         DBG_PRINTF("[HDMI] clk_sys=%lu Hz hdmi_hz=%d clkdiv=%.5f (frac=%.5f)\n",

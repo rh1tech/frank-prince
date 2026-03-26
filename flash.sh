@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Flash murmprince using picotool.
+# Flash frank-prince using picotool.
 # Usage:
-#   ./flash.sh                 # flashes ./build-make/murmprince.elf (falls back to ./build/murmprince.elf)
+#   ./flash.sh                 # flashes ./build-make/frank-prince.elf (falls back to ./build/frank-prince.elf)
 #   ./flash.sh path/to/app.elf # flashes a specific ELF
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -11,10 +11,10 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [[ -n "${1:-}" ]]; then
   ELF_PATH="$1"
 else
-  if [[ -f "$ROOT_DIR/build-make/murmprince.elf" ]]; then
-    ELF_PATH="$ROOT_DIR/build-make/murmprince.elf"
+  if [[ -f "$ROOT_DIR/build-make/frank-prince.elf" ]]; then
+    ELF_PATH="$ROOT_DIR/build-make/frank-prince.elf"
   else
-    ELF_PATH="$ROOT_DIR/build/murmprince.elf"
+    ELF_PATH="$ROOT_DIR/build/frank-prince.elf"
   fi
 fi
 

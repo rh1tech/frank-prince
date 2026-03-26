@@ -1,5 +1,5 @@
 /*
- * MurmPrince Start Screen
+ * FRANK Prince Start Screen
  * Displays system info and errors before game launch
  */
 
