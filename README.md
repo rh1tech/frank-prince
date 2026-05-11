@@ -21,6 +21,13 @@ Both boards provide all necessary peripherals out of the box—no additional wir
 - PS/2 and USB keyboard input
 - I2S audio output
 
+## Screenshots
+
+![Gameplay Screenshot 1](screenshots/screen1.png)
+![Gameplay Screenshot 2](screenshots/screen2.png)
+![Gameplay Screenshot 3](screenshots/screen3.png)
+![Gameplay Screenshot 4](screenshots/scren4.png)
+
 ## Hardware Requirements
 
 - **Raspberry Pi Pico 2** (RP2350) or compatible board
